@@ -1,7 +1,5 @@
 package parkhaus;
 
-import javax.swing.JFrame;
-
 /**
  *
  * @author Simon
@@ -9,20 +7,17 @@ import javax.swing.JFrame;
 public class Parkhaus {
 
     private String Parkhaus_Name;
-    private int Hoehe_in_cm, Stellpleatze;
+    private int Hoehe_in_cm, Stellplaetze;
 
-    public Parkhaus(String Parkhaus_Name, int Hoehe_in_cm, int Stellpleatze) {
-        this.Parkhaus_Name = Parkhaus_Name;
-        this.Hoehe_in_cm = Hoehe_in_cm;
-        this.Stellpleatze = Stellpleatze;
+    public Parkhaus() {
     }
 
     public void setStellpleatze(int Stellpleatze) {
-        this.Stellpleatze = Stellpleatze;
+        this.Stellplaetze = Stellpleatze;
     }
 
     public int getStellpleatze() {
-        return Stellpleatze;
+        return Stellplaetze;
     }
 
     public String getParkhaus_Name() {
@@ -31,5 +26,17 @@ public class Parkhaus {
 
     public int getHoehe_in_cm() {
         return Hoehe_in_cm;
+    }
+
+    public void setParkhaus_Name(String Parkhaus_Name) {
+        this.Parkhaus_Name = Parkhaus_Name;
+    }
+
+    public void setHoehe_in_cm(int Hoehe_in_cm) {
+        this.Hoehe_in_cm = Hoehe_in_cm;
+    }
+
+    public void setStellplaetze(int Stellplaetze) {
+        this.Stellplaetze = Stellplaetze;
     }
 }
