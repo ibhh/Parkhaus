@@ -9,7 +9,10 @@ public class Parkhaus {
     private String Parkhaus_Name;
     private int Hoehe_in_cm, Stellplaetze;
 
-    public Parkhaus() {
+    public Parkhaus(String Parkhaus_Name, int Hoehe_in_cm, int Stellplaetze) {
+        this.Parkhaus_Name = Parkhaus_Name;
+        this.Hoehe_in_cm = Hoehe_in_cm;
+        this.Stellplaetze = Stellplaetze;
     }
 
     public void setStellpleatze(int Stellpleatze) {

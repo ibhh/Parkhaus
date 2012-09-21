@@ -24,7 +24,7 @@ public class MainClass extends JFrame {
 
     public MainClass() throws HeadlessException {
         super();
-        setTitle("Parkhaus");
+        setTitle(parkhaus.getParkhaus_Name());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         hauptPanel = init();
         this.getContentPane().add(hauptPanel);
@@ -93,7 +93,7 @@ public class MainClass extends JFrame {
             }
         });
         North.add(ButtonSendParkhausname, BorderLayout.EAST);
-        Parkhausname = new JTextField("Parkhaus");
+        Parkhausname = new JTextField(parkhaus.getParkhaus_Name());
         North.add(Parkhausname, BorderLayout.WEST);
         panel.add(North, BorderLayout.CENTER);
         StatusLabel = new JLabel("Status: Running");
@@ -108,7 +108,9 @@ public class MainClass extends JFrame {
         try {
             parkhaus = load();
         } catch (Exception e) {
-            parkhaus = new Parkhaus();
+        }
+        if (parkhaus == null) {
+            parkhaus = new Parkhaus("Parkhaus", 200, 200);
         }
         new MainClass();
     }
