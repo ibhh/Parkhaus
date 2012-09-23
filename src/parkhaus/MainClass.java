@@ -8,6 +8,7 @@ import java.io.File;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -29,7 +30,7 @@ public class MainClass extends JFrame {
         hauptPanel = init();
         this.getContentPane().add(hauptPanel);
         setVisible(true);
-        setBounds(200, 200, 400, 150);
+        setBounds(200, 200, 500, 150);
         hauptPanel.updateUI();
     }
 
@@ -56,7 +57,6 @@ public class MainClass extends JFrame {
                 MainClass.this.dispose();
             }
         });
-        panel.add(Button1, BorderLayout.SOUTH);
         JButton Button2 = new JButton("Delete data");
         Button2.addActionListener(new ActionListener() {
             @Override
@@ -78,27 +78,117 @@ public class MainClass extends JFrame {
             }
         });
         JPanel firstline = new JPanel(new BorderLayout());
-        panel.add(Button1, BorderLayout.SOUTH);
         firstline.add(Button2, BorderLayout.EAST);
         firstline.add(Button3, BorderLayout.WEST);
         panel.add(firstline, BorderLayout.BEFORE_FIRST_LINE);
-        JPanel North = new JPanel(new BorderLayout());
+        final String[] data = {"Parkhausname ändern", "Stellplatzanzahl ändern", "nichts tun"};
+        final JList<String> myList = new JList<String>(data);
+        JButton ButtonSelect = new JButton("Ok");
+        ButtonSelect.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (myList.getSelectedIndices().length != 0) {
+                    if (myList.getSelectedIndex() != -1) {
+                        if (myList.getSelectedIndices().length == 1) {
+                            if (myList.getSelectedValue().equals(data[0])) {
+                                parkHausnameaendern();
+                                StatusLabel.setText("Bitte Parkhausname in neuem Fenster ändern!");
+                            } else if (myList.getSelectedValue().equals(data[1])) {
+                                Stellplatzanzahlaendern();
+                                StatusLabel.setText("Bitte Stellplatzanzahl in neuem Fenster ändern!");
+                            }
+                        } else {
+                            StatusLabel.setText("Nur eine Auswahl treffen!");
+                        }
+                    }
+                }
+            }
+        });
+        panel.add(myList, BorderLayout.WEST);
+        panel.add(ButtonSelect, BorderLayout.EAST);
+        JPanel lastline = new JPanel(new BorderLayout());
+        StatusLabel = new JLabel("Status: Running");
+        lastline.add(StatusLabel, BorderLayout.WEST);
+        lastline.add(Button1, BorderLayout.EAST);
+        panel.add(lastline, BorderLayout.SOUTH);
+        return panel;
+    }
+
+    public void Stellplatzanzahlaendern() {
+        final JFrame ChangePanel = new JFrame("Stellplatzanzahl ändern");
+        ChangePanel.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        JPanel panel = new JPanel(new BorderLayout());
+        final JLabel Label = new JLabel("Status: Bitte ändern sie die Anzahl");
+        final JTextField Stellplaetze = new JTextField(String.valueOf(parkhaus.getStellpleatze()));
+        JButton ButtonSendParkhausname = new JButton("Ok");
+        ButtonSendParkhausname.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (Tools.isInteger(Stellplaetze.getText())) {
+                    parkhaus.setStellplaetze(Integer.parseInt(Stellplaetze.getText()));
+                    Label.setText("Status: Stellplatzanzahl geändert!");
+                } else {
+                    Label.setText("Status: Keine Zahl!");
+                }
+            }
+        });
+        JButton Button1 = new JButton("Beenden");
+        Button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (!save()) {
+                    Label.setText("Status: Can not save data!");
+                    return;
+                }
+                ChangePanel.remove(ChangePanel);
+                ChangePanel.repaint();
+                ChangePanel.dispose();
+            }
+        });
+        panel.add(Label, BorderLayout.NORTH);
+        panel.add(ButtonSendParkhausname, BorderLayout.EAST);
+        panel.add(Stellplaetze, BorderLayout.WEST);
+        panel.add(Button1, BorderLayout.SOUTH);
+        ChangePanel.getContentPane().add(panel);
+        ChangePanel.setVisible(true);
+        ChangePanel.setBounds(200, 200, 200, 150);
+    }
+
+    public void parkHausnameaendern() {
+        final JFrame ChangePanel = new JFrame("ParkhausName ändern");
+        ChangePanel.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        JPanel panel = new JPanel(new BorderLayout());
+        final JLabel Label = new JLabel("Status: Bitte ändern sie den Namen");
         JButton ButtonSendParkhausname = new JButton("Ok");
         ButtonSendParkhausname.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
                 setTitle(Parkhausname.getText());
                 parkhaus.setParkhaus_Name(Parkhausname.getText());
-                StatusLabel.setText("Status: Parkhausname geändert!");
+                Label.setText("Status: Parkhausname geändert!");
             }
         });
-        North.add(ButtonSendParkhausname, BorderLayout.EAST);
+        JButton Button1 = new JButton("Beenden");
+        Button1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (!save()) {
+                    Label.setText("Status: Can not save data!");
+                    return;
+                }
+                ChangePanel.remove(ChangePanel);
+                ChangePanel.repaint();
+                ChangePanel.dispose();
+            }
+        });
+        panel.add(Label, BorderLayout.NORTH);
         Parkhausname = new JTextField(parkhaus.getParkhaus_Name());
-        North.add(Parkhausname, BorderLayout.WEST);
-        panel.add(North, BorderLayout.CENTER);
-        StatusLabel = new JLabel("Status: Running");
-        panel.add(StatusLabel, BorderLayout.SOUTH);
-        return panel;
+        panel.add(Parkhausname, BorderLayout.WEST);
+        panel.add(ButtonSendParkhausname, BorderLayout.EAST);
+        panel.add(Button1, BorderLayout.SOUTH);
+        ChangePanel.getContentPane().add(panel);
+        ChangePanel.setVisible(true);
+        ChangePanel.setBounds(200, 200, 250, 125);
     }
 
     /**

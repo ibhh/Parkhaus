@@ -1,10 +1,15 @@
 package parkhaus;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+
 /**
  *
  * @author Simon
  */
-public class Parkhaus {
+public class Parkhaus implements Serializable{
 
     private String Parkhaus_Name;
     private int Hoehe_in_cm, Stellplaetze;
@@ -13,10 +18,6 @@ public class Parkhaus {
         this.Parkhaus_Name = Parkhaus_Name;
         this.Hoehe_in_cm = Hoehe_in_cm;
         this.Stellplaetze = Stellplaetze;
-    }
-
-    public void setStellpleatze(int Stellpleatze) {
-        this.Stellplaetze = Stellpleatze;
     }
 
     public int getStellpleatze() {
@@ -41,5 +42,17 @@ public class Parkhaus {
 
     public void setStellplaetze(int Stellplaetze) {
         this.Stellplaetze = Stellplaetze;
+    }
+    
+    private void writeObject(ObjectOutputStream oos) throws IOException {
+        oos.writeChars(Parkhaus_Name);
+        oos.write(Hoehe_in_cm);
+        oos.write(Stellplaetze);
+    }
+
+    private void readObjekt(ObjectInputStream ois) throws IOException {
+        Parkhaus_Name = ois.readUTF();
+        Hoehe_in_cm = ois.readInt();
+        Stellplaetze = ois.readInt();
     }
 }
