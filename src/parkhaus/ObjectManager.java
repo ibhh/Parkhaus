@@ -4,6 +4,7 @@
  */
 package parkhaus;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
@@ -34,6 +35,5 @@ public class ObjectManager {
         T result = (T) ois.readObject();
         ois.close();
         return result;
-
     }
 }

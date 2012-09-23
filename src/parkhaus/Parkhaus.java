@@ -44,15 +44,15 @@ public class Parkhaus implements Serializable{
         this.Stellplaetze = Stellplaetze;
     }
     
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.writeChars(Parkhaus_Name);
-        oos.write(Hoehe_in_cm);
-        oos.write(Stellplaetze);
-    }
-
-    private void readObjekt(ObjectInputStream ois) throws IOException {
-        Parkhaus_Name = ois.readUTF();
-        Hoehe_in_cm = ois.readInt();
-        Stellplaetze = ois.readInt();
-    }
+//    private void writeObject(ObjectOutputStream oos) throws IOException {
+//        oos.writeUTF(Parkhaus_Name);
+//        oos.write(Hoehe_in_cm);
+//        oos.write(Stellplaetze);
+//    }
+//
+//    private void readObjekt(ObjectInputStream ois) throws IOException {
+//        Parkhaus_Name = ois.readUTF();
+//        Hoehe_in_cm = ois.readInt();
+//        Stellplaetze = ois.readInt();
+//    }
 }

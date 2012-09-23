@@ -5,10 +5,16 @@ import java.awt.HeadlessException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -18,6 +24,7 @@ import javax.swing.JTextField;
  */
 public class MainClass extends JFrame {
 
+    private boolean debug = true;
     private JPanel hauptPanel;
     private JLabel StatusLabel;
     private JTextField Parkhausname;
@@ -25,12 +32,13 @@ public class MainClass extends JFrame {
 
     public MainClass() throws HeadlessException {
         super();
-        setTitle(parkhaus.getParkhaus_Name());
+        setTitle("Parkhaus");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         hauptPanel = init();
         this.getContentPane().add(hauptPanel);
         setVisible(true);
         setBounds(200, 200, 500, 150);
+        setJMenuBar(getMenu());
         hauptPanel.updateUI();
     }
 
@@ -42,70 +50,143 @@ public class MainClass extends JFrame {
         return StatusLabel;
     }
 
+    public JMenuBar getMenu() {
+        //Initialisiern des Menüs
+        JMenuBar MenuBar = new JMenuBar();
+        JMenu Menu = new JMenu("Datei");
+        //Menü zusammenbauen
+        JMenuItem Neu = new JMenuItem("Neues Parkhaus");
+        Neu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                parkhaus = new Parkhaus("Parkhausname", 200, 200);
+                JOptionPane.showMessageDialog(MainClass.this, "Erfolgreich erstellt!", "ok", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        Menu.add(Neu);
+        Menu.addSeparator();
+        JMenuItem itemOeffnen = new JMenuItem("Datei öffnen", new ImageIcon("open.gif"));
+        itemOeffnen.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                JFileChooser dateiAuswahl = new JFileChooser(".");
+                int status = dateiAuswahl.showOpenDialog(MainClass.this);
+                if (status == JFileChooser.APPROVE_OPTION) {
+                    File datei = dateiAuswahl.getSelectedFile();
+                    try {
+                        load(datei.getAbsolutePath());
+                        JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich geladen!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (Exception ex) {
+                        if (debug) {
+                            ex.printStackTrace();
+                        }
+                        JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht geladen werden: " + ex.getMessage(), "Fehler beim laden", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+        JMenuItem itemSpeichern = new JMenuItem("Datei speichern", new ImageIcon("open.gif"));
+        itemSpeichern.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                JFileChooser dateiAuswahl = new JFileChooser(".");
+                int status = dateiAuswahl.showSaveDialog(MainClass.this);
+                if (status == JFileChooser.APPROVE_OPTION) {
+                    File datei = dateiAuswahl.getSelectedFile();
+                    try {
+                        if (datei.exists()) {
+                            int returnstatus = JOptionPane.showConfirmDialog(MainClass.this, "Soll die Datei überschrieben werden?", "Überschreiben?", JOptionPane.OK_CANCEL_OPTION);
+                            if (returnstatus == JOptionPane.OK_OPTION) {
+                                datei.delete();
+                                try {
+                                    save(datei.getAbsolutePath());
+                                    JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich gespeichert!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                                } catch (Exception e) {
+                                    JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht überschrieben werden: " + e.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        } else {
+                            try {
+                                save(datei.getAbsolutePath());
+                                JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich gespeichert!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                            } catch (Exception e) {
+                                JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht gespeichert werden: " + e.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht gespeichert werden: " + ex.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
+        Menu.add(itemOeffnen);
+        Menu.add(itemSpeichern);
+        MenuBar.add(Menu);
+        return MenuBar;
+    }
+
     public JPanel init() {
         JPanel panel = new JPanel(new BorderLayout());
         JButton Button1 = new JButton("Beenden");
         Button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                if (!save()) {
-                    StatusLabel.setText("Status: Can not save data!");
-                    return;
-                }
+                //want to save data?
                 MainClass.this.remove(hauptPanel);
                 MainClass.this.repaint();
                 MainClass.this.dispose();
+                System.exit(0);
             }
         });
-        JButton Button2 = new JButton("Delete data");
-        Button2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (!deleteData()) {
-                    StatusLabel.setText("Status: Can not delete data!");
-                }
-            }
-        });
-        JButton Button3 = new JButton("save data");
-        Button3.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (!save()) {
-                    StatusLabel.setText("Status: Can not save data!");
-                } else {
-                    StatusLabel.setText("Status: Data saved!");
-                }
-            }
-        });
+//        JButton Button2 = new JButton("Delete data");
+//        Button2.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent event) {
+//                if (!deleteData()) {
+//                    StatusLabel.setText("Status: Can not delete data!");
+//                }
+//            }
+//        });
+//        JButton Button3 = new JButton("save data");
+//        Button3.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent event) {
+//                if (!save()) {
+//                    StatusLabel.setText("Status: Can not save data!");
+//                } else {
+//                    StatusLabel.setText("Status: Data saved!");
+//                }
+//            }
+//        });
         JPanel firstline = new JPanel(new BorderLayout());
-        firstline.add(Button2, BorderLayout.EAST);
-        firstline.add(Button3, BorderLayout.WEST);
+//        firstline.add(Button2, BorderLayout.EAST);
+//        firstline.add(Button3, BorderLayout.WEST);
         panel.add(firstline, BorderLayout.BEFORE_FIRST_LINE);
-        final String[] data = {"Parkhausname ändern", "Stellplatzanzahl ändern", "nichts tun"};
-        final JList<String> myList = new JList<String>(data);
-        JButton ButtonSelect = new JButton("Ok");
-        ButtonSelect.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (myList.getSelectedIndices().length != 0) {
-                    if (myList.getSelectedIndex() != -1) {
-                        if (myList.getSelectedIndices().length == 1) {
-                            if (myList.getSelectedValue().equals(data[0])) {
-                                parkHausnameaendern();
-                                StatusLabel.setText("Bitte Parkhausname in neuem Fenster ändern!");
-                            } else if (myList.getSelectedValue().equals(data[1])) {
-                                Stellplatzanzahlaendern();
-                                StatusLabel.setText("Bitte Stellplatzanzahl in neuem Fenster ändern!");
-                            }
-                        } else {
-                            StatusLabel.setText("Nur eine Auswahl treffen!");
-                        }
-                    }
-                }
-            }
-        });
-        panel.add(myList, BorderLayout.WEST);
-        panel.add(ButtonSelect, BorderLayout.EAST);
+//        final String[] data = {"Parkhausname ändern", "Stellplatzanzahl ändern", "nichts tun"};
+//        final JList<String> myList = new JList<String>(data);
+//        JButton ButtonSelect = new JButton("Ok");
+//        ButtonSelect.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent event) {
+//                if (myList.getSelectedIndices().length != 0) {
+//                    if (myList.getSelectedIndex() != -1) {
+//                        if (myList.getSelectedIndices().length == 1) {
+//                            if (myList.getSelectedValue().equals(data[0])) {
+//                                parkHausnameaendern();
+//                                StatusLabel.setText("Bitte Parkhausname in neuem Fenster ändern!");
+//                            } else if (myList.getSelectedValue().equals(data[1])) {
+//                                Stellplatzanzahlaendern();
+//                                StatusLabel.setText("Bitte Stellplatzanzahl in neuem Fenster ändern!");
+//                            }
+//                        } else {
+//                            StatusLabel.setText("Nur eine Auswahl treffen!");
+//                        }
+//                    }
+//                }
+//            }
+//        });
+//        panel.add(myList, BorderLayout.WEST);
+//        panel.add(ButtonSelect, BorderLayout.EAST);
         JPanel lastline = new JPanel(new BorderLayout());
         StatusLabel = new JLabel("Status: Running");
         lastline.add(StatusLabel, BorderLayout.WEST);
@@ -136,10 +217,6 @@ public class MainClass extends JFrame {
         Button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                if (!save()) {
-                    Label.setText("Status: Can not save data!");
-                    return;
-                }
                 ChangePanel.remove(ChangePanel);
                 ChangePanel.repaint();
                 ChangePanel.dispose();
@@ -172,10 +249,6 @@ public class MainClass extends JFrame {
         Button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                if (!save()) {
-                    Label.setText("Status: Can not save data!");
-                    return;
-                }
                 ChangePanel.remove(ChangePanel);
                 ChangePanel.repaint();
                 ChangePanel.dispose();
@@ -195,31 +268,15 @@ public class MainClass extends JFrame {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        try {
-            parkhaus = load();
-        } catch (Exception e) {
-        }
-        if (parkhaus == null) {
-            parkhaus = new Parkhaus("Parkhaus", 200, 200);
-        }
         new MainClass();
     }
 
-    public static Parkhaus load() throws Exception {
-        return parkhaus = ObjectManager.load("ParkhausData" + File.separator + "ParkhausData.dat");
+    public static Parkhaus load(String path) throws Exception {
+        return parkhaus = ObjectManager.load(path);
     }
 
-    public boolean save() {
-        try {
-            String path = "ParkhausData" + File.separator;
-            File pathFile = new File(path);
-            pathFile.mkdirs();
-            ObjectManager.save(parkhaus, path + "ParkhausData.dat");
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public void save(String path) throws Exception {
+        ObjectManager.save(parkhaus, path);
     }
 
     public boolean deleteData() {
