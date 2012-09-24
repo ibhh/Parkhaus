@@ -10,7 +10,6 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -26,7 +25,7 @@ public class MainClass extends JFrame {
 
     private boolean debug = true;
     private JPanel hauptPanel;
-    private JLabel StatusLabel;
+    private static JLabel StatusLabel;
     private JTextField Parkhausname;
     private static Parkhaus parkhaus;
 
@@ -37,7 +36,7 @@ public class MainClass extends JFrame {
         hauptPanel = init();
         this.getContentPane().add(hauptPanel);
         setVisible(true);
-        setBounds(200, 200, 500, 150);
+        setBounds(200, 200, 500, 200);
         setJMenuBar(getMenu());
         hauptPanel.updateUI();
     }
@@ -46,8 +45,61 @@ public class MainClass extends JFrame {
         return parkhaus;
     }
 
-    public JLabel getStatusLabel() {
+    public static JLabel getStatusLabel() {
         return StatusLabel;
+    }
+
+    /**
+     * Returns an ImageIcon, or null if the path was invalid.
+     */
+    protected ImageIcon createImageIcon(String path, String description) {
+        java.net.URL imgURL = getClass().getResource(path);
+        if (imgURL != null) {
+            return new ImageIcon(imgURL, description);
+        } else {
+            System.err.println("Couldn't find file: " + path);
+            return null;
+        }
+    }
+
+    public void exit() {
+        if (parkhaus != null) {
+            int save = JOptionPane.showConfirmDialog(MainClass.this, "Soll das Projekt gespeichert werden?", "Speichern?", JOptionPane.OK_CANCEL_OPTION);
+            if (save == JOptionPane.OK_OPTION) {
+                JFileChooser dateiAuswahl = new JFileChooser(".");
+                int status = dateiAuswahl.showSaveDialog(MainClass.this);
+                if (status == JFileChooser.APPROVE_OPTION) {
+                    File datei = dateiAuswahl.getSelectedFile();
+                    try {
+                        if (datei.exists()) {
+                            int returnstatus = JOptionPane.showConfirmDialog(MainClass.this, "Soll die Datei überschrieben werden?", "Überschreiben?", JOptionPane.OK_CANCEL_OPTION);
+                            if (returnstatus == JOptionPane.OK_OPTION) {
+                                datei.delete();
+                                try {
+                                    save(datei.getAbsolutePath());
+                                    JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich gespeichert!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                                } catch (Exception e) {
+                                    JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht überschrieben werden: " + e.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
+                                }
+                            }
+                        } else {
+                            try {
+                                save(datei.getAbsolutePath());
+                                JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich gespeichert!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                            } catch (Exception e) {
+                                JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht gespeichert werden: " + e.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
+                            }
+                        }
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht gespeichert werden: " + ex.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        }
+        MainClass.this.remove(hauptPanel);
+        MainClass.this.repaint();
+        MainClass.this.dispose();
+        System.exit(0);
     }
 
     public JMenuBar getMenu() {
@@ -61,14 +113,21 @@ public class MainClass extends JFrame {
             public void actionPerformed(ActionEvent event) {
                 parkhaus = new Parkhaus("Parkhausname", 200, 200);
                 JOptionPane.showMessageDialog(MainClass.this, "Erfolgreich erstellt!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                StatusLabel.setText("Status: Projekt " + parkhaus.getParkhaus_Name() + " geöffnet!");
             }
         });
         Menu.add(Neu);
         Menu.addSeparator();
-        JMenuItem itemOeffnen = new JMenuItem("Datei öffnen", new ImageIcon("open.gif"));
+        JMenuItem itemOeffnen = new JMenuItem("Datei öffnen");
         itemOeffnen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
+                if (parkhaus != null) {
+                    int returnstatus = JOptionPane.showConfirmDialog(MainClass.this, "Soll das aktuelle Projekt geschlossen werden?", "Neues Projekt laden?", JOptionPane.OK_CANCEL_OPTION);
+                    if (returnstatus != JOptionPane.OK_OPTION) {
+                        return;
+                    }
+                }
                 JFileChooser dateiAuswahl = new JFileChooser(".");
                 int status = dateiAuswahl.showOpenDialog(MainClass.this);
                 if (status == JFileChooser.APPROVE_OPTION) {
@@ -76,6 +135,7 @@ public class MainClass extends JFrame {
                     try {
                         load(datei.getAbsolutePath());
                         JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich geladen!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                        StatusLabel.setText("Status: Projekt " + parkhaus.getParkhaus_Name() + " geöffnet!");
                     } catch (Exception ex) {
                         if (debug) {
                             ex.printStackTrace();
@@ -85,10 +145,14 @@ public class MainClass extends JFrame {
                 }
             }
         });
-        JMenuItem itemSpeichern = new JMenuItem("Datei speichern", new ImageIcon("open.gif"));
+        JMenuItem itemSpeichern = new JMenuItem("Datei speichern");
         itemSpeichern.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
+                if (parkhaus == null) {
+                    JOptionPane.showMessageDialog(MainClass.this, "Kein Projekt geladen!", "Kein Projekt", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 JFileChooser dateiAuswahl = new JFileChooser(".");
                 int status = dateiAuswahl.showSaveDialog(MainClass.this);
                 if (status == JFileChooser.APPROVE_OPTION) {
@@ -119,77 +183,52 @@ public class MainClass extends JFrame {
                 }
             }
         });
+        JMenuItem beenden = new JMenuItem("Beenden");
+        beenden.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                exit();
+            }
+        });
         Menu.add(itemOeffnen);
         Menu.add(itemSpeichern);
+        Menu.addSeparator();
+        Menu.add(beenden);
         MenuBar.add(Menu);
+        JMenu Menu2 = new JMenu("Ändern");
+        //Menü zusammenbauen
+        JMenuItem Nameaendern = new JMenuItem("Name ändern");
+        Nameaendern.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                if (parkhaus != null) {
+                    EditProjektName name = new EditProjektName(MainClass.this, true);
+                } else {
+                    JOptionPane.showMessageDialog(MainClass.this, "Kein Projekt geladen!", "Kein Projekt", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        Menu2.add(Nameaendern);
+        MenuBar.add(Menu2);
         return MenuBar;
     }
 
     public JPanel init() {
         JPanel panel = new JPanel(new BorderLayout());
-        JButton Button1 = new JButton("Beenden");
+        final DatenUebersicht center = new DatenUebersicht();
+        panel.add(center, BorderLayout.CENTER);
+        JPanel lastline = new JPanel(new BorderLayout());
+        StatusLabel = new JLabel("Status: No Projekt opened!");
+        lastline.add(StatusLabel, BorderLayout.WEST);
+        JButton Button1 = new JButton("Aktualisieren");
         Button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                //want to save data?
-                MainClass.this.remove(hauptPanel);
-                MainClass.this.repaint();
-                MainClass.this.dispose();
-                System.exit(0);
+                if (!center.aktualisieren()) {
+                    JOptionPane.showMessageDialog(MainClass.this, "Ansicht kann nicht aktualisiert werden, da kein Projekt geladen ist", "Fehler beim aktualisieren", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
-//        JButton Button2 = new JButton("Delete data");
-//        Button2.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent event) {
-//                if (!deleteData()) {
-//                    StatusLabel.setText("Status: Can not delete data!");
-//                }
-//            }
-//        });
-//        JButton Button3 = new JButton("save data");
-//        Button3.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent event) {
-//                if (!save()) {
-//                    StatusLabel.setText("Status: Can not save data!");
-//                } else {
-//                    StatusLabel.setText("Status: Data saved!");
-//                }
-//            }
-//        });
-        JPanel firstline = new JPanel(new BorderLayout());
-//        firstline.add(Button2, BorderLayout.EAST);
-//        firstline.add(Button3, BorderLayout.WEST);
-        panel.add(firstline, BorderLayout.BEFORE_FIRST_LINE);
-//        final String[] data = {"Parkhausname ändern", "Stellplatzanzahl ändern", "nichts tun"};
-//        final JList<String> myList = new JList<String>(data);
-//        JButton ButtonSelect = new JButton("Ok");
-//        ButtonSelect.addActionListener(new ActionListener() {
-//            @Override
-//            public void actionPerformed(ActionEvent event) {
-//                if (myList.getSelectedIndices().length != 0) {
-//                    if (myList.getSelectedIndex() != -1) {
-//                        if (myList.getSelectedIndices().length == 1) {
-//                            if (myList.getSelectedValue().equals(data[0])) {
-//                                parkHausnameaendern();
-//                                StatusLabel.setText("Bitte Parkhausname in neuem Fenster ändern!");
-//                            } else if (myList.getSelectedValue().equals(data[1])) {
-//                                Stellplatzanzahlaendern();
-//                                StatusLabel.setText("Bitte Stellplatzanzahl in neuem Fenster ändern!");
-//                            }
-//                        } else {
-//                            StatusLabel.setText("Nur eine Auswahl treffen!");
-//                        }
-//                    }
-//                }
-//            }
-//        });
-//        panel.add(myList, BorderLayout.WEST);
-//        panel.add(ButtonSelect, BorderLayout.EAST);
-        JPanel lastline = new JPanel(new BorderLayout());
-        StatusLabel = new JLabel("Status: Running");
-        lastline.add(StatusLabel, BorderLayout.WEST);
         lastline.add(Button1, BorderLayout.EAST);
         panel.add(lastline, BorderLayout.SOUTH);
         return panel;
@@ -268,7 +307,14 @@ public class MainClass extends JFrame {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new MainClass();
+        final MainClass dialog = new MainClass();
+        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                dialog.exit();
+            }
+        });
+
     }
 
     public static Parkhaus load(String path) throws Exception {
