@@ -26,8 +26,8 @@ public class MainClass extends JFrame {
     private boolean debug = true;
     private JPanel hauptPanel;
     private static JLabel StatusLabel;
-    private JTextField Parkhausname;
     private static Parkhaus parkhaus;
+    private static DatenUebersicht daten;
 
     public MainClass() throws HeadlessException {
         super();
@@ -47,6 +47,10 @@ public class MainClass extends JFrame {
 
     public static JLabel getStatusLabel() {
         return StatusLabel;
+    }
+    
+    public static void neuesParkhaus(String name, int hoehe, int Stellplaetze){
+        parkhaus = new Parkhaus(name, hoehe, Stellplaetze);
     }
 
     /**
@@ -111,9 +115,7 @@ public class MainClass extends JFrame {
         Neu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                parkhaus = new Parkhaus("Parkhausname", 200, 200);
-                JOptionPane.showMessageDialog(MainClass.this, "Erfolgreich erstellt!", "ok", JOptionPane.INFORMATION_MESSAGE);
-                StatusLabel.setText("Status: Projekt " + parkhaus.getParkhaus_Name() + " geöffnet!");
+                new NeuesParkhaus(MainClass.this, true);
             }
         });
         Menu.add(Neu);
@@ -215,8 +217,8 @@ public class MainClass extends JFrame {
 
     public JPanel init() {
         JPanel panel = new JPanel(new BorderLayout());
-        final DatenUebersicht center = new DatenUebersicht();
-        panel.add(center, BorderLayout.CENTER);
+        daten = new DatenUebersicht();
+        panel.add(daten, BorderLayout.CENTER);
         JPanel lastline = new JPanel(new BorderLayout());
         StatusLabel = new JLabel("Status: No Projekt opened!");
         lastline.add(StatusLabel, BorderLayout.WEST);
@@ -224,7 +226,7 @@ public class MainClass extends JFrame {
         Button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                if (!center.aktualisieren()) {
+                if (!daten.aktualisieren()) {
                     JOptionPane.showMessageDialog(MainClass.this, "Ansicht kann nicht aktualisiert werden, da kein Projekt geladen ist", "Fehler beim aktualisieren", JOptionPane.ERROR_MESSAGE);
                 }
             }
@@ -234,6 +236,10 @@ public class MainClass extends JFrame {
         return panel;
     }
 
+    public static DatenUebersicht getDaten() {
+        return daten;
+    }
+    
     public void Stellplatzanzahlaendern() {
         final JFrame ChangePanel = new JFrame("Stellplatzanzahl ändern");
         ChangePanel.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -270,39 +276,6 @@ public class MainClass extends JFrame {
         ChangePanel.setBounds(200, 200, 200, 150);
     }
 
-    public void parkHausnameaendern() {
-        final JFrame ChangePanel = new JFrame("ParkhausName ändern");
-        ChangePanel.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        JPanel panel = new JPanel(new BorderLayout());
-        final JLabel Label = new JLabel("Status: Bitte ändern sie den Namen");
-        JButton ButtonSendParkhausname = new JButton("Ok");
-        ButtonSendParkhausname.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                setTitle(Parkhausname.getText());
-                parkhaus.setParkhaus_Name(Parkhausname.getText());
-                Label.setText("Status: Parkhausname geändert!");
-            }
-        });
-        JButton Button1 = new JButton("Beenden");
-        Button1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                ChangePanel.remove(ChangePanel);
-                ChangePanel.repaint();
-                ChangePanel.dispose();
-            }
-        });
-        panel.add(Label, BorderLayout.NORTH);
-        Parkhausname = new JTextField(parkhaus.getParkhaus_Name());
-        panel.add(Parkhausname, BorderLayout.WEST);
-        panel.add(ButtonSendParkhausname, BorderLayout.EAST);
-        panel.add(Button1, BorderLayout.SOUTH);
-        ChangePanel.getContentPane().add(panel);
-        ChangePanel.setVisible(true);
-        ChangePanel.setBounds(200, 200, 250, 125);
-    }
-
     /**
      * @param args the command line arguments
      */
@@ -323,25 +296,5 @@ public class MainClass extends JFrame {
 
     public void save(String path) throws Exception {
         ObjectManager.save(parkhaus, path);
-    }
-
-    public boolean deleteData() {
-        try {
-            String path = "ParkhausData" + File.separator;
-            File pathFile = new File(path);
-            StatusLabel.setText("Status: Deleting data ...");
-            pathFile.mkdirs();
-            File file = new File(path + "ParkhausData.dat");
-            if (file.exists()) {
-                file.delete();
-                StatusLabel.setText("Status: Deleted data!");
-            } else {
-                StatusLabel.setText("Status: No data found!");
-            }
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
     }
 }

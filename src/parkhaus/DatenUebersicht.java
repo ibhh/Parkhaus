@@ -19,9 +19,9 @@ public class DatenUebersicht extends javax.swing.JPanel {
 
     public boolean aktualisieren() {
         if (MainClass.getParkhaus() != null) {
-            parkhausname_text.setToolTipText(MainClass.getParkhaus().getParkhaus_Name());
-            Stellplaetze_text.setToolTipText(String.valueOf(MainClass.getParkhaus().getStellpleatze()));
-            Hoehe_text.setToolTipText(String.valueOf(MainClass.getParkhaus().getHoehe_in_cm()));
+            Parkhausname_text.setText(MainClass.getParkhaus().getParkhaus_Name());
+            Stellplaetze_text.setText(String.valueOf(MainClass.getParkhaus().getStellpleatze()));
+            Hoehe_text.setText(String.valueOf(MainClass.getParkhaus().getHoehe_in_cm()));
             return true;
         }
         return false;
@@ -40,33 +40,23 @@ public class DatenUebersicht extends javax.swing.JPanel {
         name = new javax.swing.JLabel();
         stellplaetze = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
-        parkhausname_text = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
-        Stellplaetze_text = new javax.swing.JScrollPane();
-        jTextPane2 = new javax.swing.JTextPane();
-        Hoehe_text = new javax.swing.JScrollPane();
-        jTextPane3 = new javax.swing.JTextPane();
+        Parkhausname_text = new javax.swing.JLabel();
+        Stellplaetze_text = new javax.swing.JLabel();
+        Hoehe_text = new javax.swing.JLabel();
 
         jLabel2.setText("jLabel2");
 
         name.setText("Parkhausname:");
+        name.setMaximumSize(new java.awt.Dimension(53, 14));
+        name.setMinimumSize(new java.awt.Dimension(53, 14));
+        name.setPreferredSize(new java.awt.Dimension(53, 14));
 
         stellplaetze.setText("Stellplätze:");
 
         jLabel1.setText("Höhe in cm:");
-
-        parkhausname_text.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        parkhausname_text.setToolTipText("");
-        parkhausname_text.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        parkhausname_text.setViewportView(jTextPane1);
-
-        Stellplaetze_text.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        Stellplaetze_text.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        Stellplaetze_text.setViewportView(jTextPane2);
-
-        Hoehe_text.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        Hoehe_text.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
-        Hoehe_text.setViewportView(jTextPane3);
+        jLabel1.setMaximumSize(new java.awt.Dimension(53, 14));
+        jLabel1.setMinimumSize(new java.awt.Dimension(53, 14));
+        jLabel1.setPreferredSize(new java.awt.Dimension(53, 14));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -74,44 +64,42 @@ public class DatenUebersicht extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(stellplaetze, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(name, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(name, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 105, Short.MAX_VALUE)
+                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(stellplaetze, javax.swing.GroupLayout.PREFERRED_SIZE, 105, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(parkhausname_text, javax.swing.GroupLayout.DEFAULT_SIZE, 145, Short.MAX_VALUE)
-                    .addComponent(Stellplaetze_text)
-                    .addComponent(Hoehe_text))
-                .addContainerGap(130, Short.MAX_VALUE))
+                    .addComponent(Parkhausname_text, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(Stellplaetze_text, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(Hoehe_text, javax.swing.GroupLayout.DEFAULT_SIZE, 147, Short.MAX_VALUE))
+                .addContainerGap(132, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(parkhausname_text, javax.swing.GroupLayout.DEFAULT_SIZE, 26, Short.MAX_VALUE)
-                    .addComponent(name, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(Parkhausname_text, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(name, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(Stellplaetze_text, javax.swing.GroupLayout.DEFAULT_SIZE, 29, Short.MAX_VALUE)
-                    .addComponent(stellplaetze, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(Stellplaetze_text, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(stellplaetze, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(Hoehe_text, javax.swing.GroupLayout.DEFAULT_SIZE, 34, Short.MAX_VALUE))
-                .addGap(0, 189, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 31, Short.MAX_VALUE)
+                    .addComponent(Hoehe_text, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(0, 195, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JScrollPane Hoehe_text;
-    private javax.swing.JScrollPane Stellplaetze_text;
+    private javax.swing.JLabel Hoehe_text;
+    private javax.swing.JLabel Parkhausname_text;
+    private javax.swing.JLabel Stellplaetze_text;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JTextPane jTextPane1;
-    private javax.swing.JTextPane jTextPane2;
-    private javax.swing.JTextPane jTextPane3;
     private javax.swing.JLabel name;
-    private javax.swing.JScrollPane parkhausname_text;
     private javax.swing.JLabel stellplaetze;
     // End of variables declaration//GEN-END:variables
 }
