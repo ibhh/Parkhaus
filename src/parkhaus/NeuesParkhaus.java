@@ -138,6 +138,7 @@ public class NeuesParkhaus extends javax.swing.JDialog {
         JOptionPane.showMessageDialog(this, "Erfolgreich erstellt!", "ok", JOptionPane.INFORMATION_MESSAGE);
         MainClass.getStatusLabel().setText("Status: Projekt " + MainClass.getParkhaus().getParkhaus_Name() + " geöffnet!");
         MainClass.getDaten().aktualisieren();
+        MainClass.setProjektloaded();
         this.remove(this);
         this.repaint();
         this.dispose();
@@ -148,7 +149,6 @@ public class NeuesParkhaus extends javax.swing.JDialog {
         this.repaint();
         this.dispose();
     }//GEN-LAST:event_AbbruchActionPerformed
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton Abbruch;
     private javax.swing.JTextField hoehe_text;
