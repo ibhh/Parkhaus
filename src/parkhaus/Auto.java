@@ -1,8 +1,5 @@
 package parkhaus;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
 /**
@@ -14,11 +11,20 @@ public class Auto implements Serializable{
     private int Parkplatznummer;
     private String Fahrer;
     private boolean parking;
+    private Auto naechster = null;
 
     public Auto(String ID, int Parkplatznummer, String Fahrer) {
         this.ID = ID;
         this.Parkplatznummer = Parkplatznummer;
         this.Fahrer = Fahrer;
+    }
+
+    public Auto getNaechster() {
+        return naechster;
+    }
+
+    public void setNaechster(Auto naechster) {
+        this.naechster = naechster;
     }
 
     public void setParking(boolean parking) {
@@ -43,20 +49,5 @@ public class Auto implements Serializable{
 
     public int getParkplatznummer() {
         return Parkplatznummer;
-    }
-    
-    
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.writeChars(ID);
-        oos.write(Parkplatznummer);
-        oos.writeChars(Fahrer);
-        oos.writeBoolean(parking);
-    }
-
-    private void readObjekt(ObjectInputStream ois) throws IOException {
-        ID = ois.readUTF();
-        Parkplatznummer = ois.readInt();
-        Fahrer = ois.readUTF();
-        parking = ois.readBoolean();
     }
 }

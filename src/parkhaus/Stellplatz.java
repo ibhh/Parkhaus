@@ -40,17 +40,17 @@ public class Stellplatz implements Serializable {
         return Lange_in_cm;
     }
 
-    private void writeObject(ObjectOutputStream oos) throws IOException {
-        oos.write(NR);
-        oos.write(Lange_in_cm);
-        oos.write(Breite_in_cm);
-        oos.writeBoolean(belegt);
-    }
-
-    private void readObjekt(ObjectInputStream ois) throws IOException {
-        NR = ois.readInt();
-        Lange_in_cm = ois.readInt();
-        Breite_in_cm = ois.readInt();
-        belegt = ois.readBoolean();
-    }
+//    private void writeObject(ObjectOutputStream oos) throws IOException {
+//        oos.write(NR);
+//        oos.write(Lange_in_cm);
+//        oos.write(Breite_in_cm);
+//        oos.writeBoolean(belegt);
+//    }
+//
+//    private void readObjekt(ObjectInputStream ois) throws IOException {
+//        NR = ois.readInt();
+//        Lange_in_cm = ois.readInt();
+//        Breite_in_cm = ois.readInt();
+//        belegt = ois.readBoolean();
+//    }
 }

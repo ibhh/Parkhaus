@@ -19,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTextField;
+import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
@@ -28,7 +29,7 @@ import javax.swing.SwingUtilities;
  */
 public class MainClass extends JFrame {
 
-    private boolean debug = true;
+    public static boolean debug = true;
     private JPanel hauptPanel;
     private static JLabel StatusLabel;
     private static Parkhaus parkhaus;
@@ -36,11 +37,15 @@ public class MainClass extends JFrame {
     private static DatenUebersicht daten;
     private static JMenu Menu = new JMenu("Datei");
     private static JMenuItem NeuesParkhaus = new JMenuItem("Neues Parkhaus");
+    private static JMenuItem NeuerStellplatz = new JMenuItem("Neuer Stellplatz");
     private static JMenuItem itemOeffnen = new JMenuItem("Datei öffnen");
     private static JMenuItem itemSpeichern = new JMenuItem("Datei speichern");
     private static JMenu Menu2 = new JMenu("Ändern");
     private static JMenuItem Nameaendern = new JMenuItem("Name ändern");
+    private static JMenuItem Stellplatz_Anzeige = new JMenuItem("Stellplätze");
     private static JButton Button1 = new JButton("Aktualisieren");
+    private static JButton oeffnen;
+    private static JButton speichern;
 
     public MainClass() throws HeadlessException {
         super();
@@ -48,17 +53,19 @@ public class MainClass extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         hauptPanel = init();
         this.getContentPane().add(hauptPanel);
-        changelookandfeel("Nimbus");
         setVisible(true);
-        setBounds(200, 200, 500, 250);
+        setBounds(200, 200, 500, 300);
         setJMenuBar(getMenu());
         hauptPanel.updateUI();
     }
-    
+
     public static void setProjektloaded() {
         itemSpeichern.setEnabled(true);
         Nameaendern.setEnabled(true);
         Button1.setEnabled(true);
+        NeuerStellplatz.setEnabled(true);
+        Stellplatz_Anzeige.setEnabled(true);
+        speichern.setEnabled(true);
         MainClass.projektloaded = true;
     }
 
@@ -82,17 +89,109 @@ public class MainClass extends JFrame {
         SwingUtilities.updateComponentTreeUI(MainClass.this);
     }
 
+    private void handleSaveClick() {
+        if (parkhaus == null) {
+            JOptionPane.showMessageDialog(MainClass.this, "Kein Projekt geladen!", "Kein Projekt", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        JFileChooser dateiAuswahl = new JFileChooser(".");
+        int status = dateiAuswahl.showSaveDialog(MainClass.this);
+        if (status == JFileChooser.APPROVE_OPTION) {
+            File datei = dateiAuswahl.getSelectedFile();
+            try {
+                if (datei.exists()) {
+                    int returnstatus = JOptionPane.showConfirmDialog(MainClass.this, "Soll die Datei überschrieben werden?", "Überschreiben?", JOptionPane.OK_CANCEL_OPTION);
+                    if (returnstatus == JOptionPane.OK_OPTION) {
+                        datei.delete();
+                        try {
+                            save(datei.getAbsolutePath());
+                            JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich gespeichert!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                        } catch (Exception e) {
+                            JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht überschrieben werden: " + e.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                } else {
+                    try {
+                        save(datei.getAbsolutePath());
+                        JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich gespeichert!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (Exception e) {
+                        JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht gespeichert werden: " + e.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht gespeichert werden: " + ex.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void handleOpenClick() {
+        if (parkhaus != null) {
+            int returnstatus = JOptionPane.showConfirmDialog(MainClass.this, "Soll das aktuelle Projekt geschlossen werden?", "Neues Projekt laden?", JOptionPane.OK_CANCEL_OPTION);
+            if (returnstatus != JOptionPane.OK_OPTION) {
+                return;
+            }
+        }
+        JFileChooser dateiAuswahl = new JFileChooser(".");
+        int status = dateiAuswahl.showOpenDialog(MainClass.this);
+        if (status == JFileChooser.APPROVE_OPTION) {
+            File datei = dateiAuswahl.getSelectedFile();
+            try {
+                load(datei.getAbsolutePath());
+                JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich geladen!", "ok", JOptionPane.INFORMATION_MESSAGE);
+                StatusLabel.setText("Status: Projekt " + parkhaus.getParkhaus_Name() + " geöffnet!");
+                getDaten().aktualisieren();
+                setProjektloaded();
+            } catch (Exception ex) {
+                if (debug) {
+                    ex.printStackTrace();
+                }
+                JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht geladen werden: " + ex.getMessage(), "Fehler beim laden", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
     public JMenuBar getMenu() {
         //Initialisiern des Menüs
         JMenuBar MenuBar = new JMenuBar();
+        JToolBar toolbar = new JToolBar();
         //Menü zusammenbauen
+        oeffnen = new JButton(new ImageIcon(this.getClass().getResource("/resources/Gnome-Document-Open-32.png")));
+        oeffnen.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                handleOpenClick();
+            }
+        });
+        speichern = new JButton(new ImageIcon(this.getClass().getResource("/resources/Gnome-Document-Save-As-32.png")));
+        toolbar.add(oeffnen);
+        speichern.setEnabled(false);
+        speichern.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                handleSaveClick();
+            }
+        });
+        toolbar.add(speichern);
+        getContentPane().add(toolbar, BorderLayout.BEFORE_FIRST_LINE);
         KeyStroke ctrl_O = KeyStroke.getKeyStroke('O', Event.CTRL_MASK);
         itemOeffnen.setAccelerator(ctrl_O);
+        ImageIcon iconOeffnen = new ImageIcon(this.getClass().getResource("/resources/Gnome-Document-Open-32.png"));
+        itemOeffnen.setIcon(iconOeffnen);
+        ImageIcon iconSpeichern = new ImageIcon(this.getClass().getResource("/resources/Gnome-Document-Save-As-32.png"));
+        itemSpeichern.setIcon(iconSpeichern);
         itemSpeichern.setEnabled(false);
         KeyStroke ctrl_S = KeyStroke.getKeyStroke('S', Event.CTRL_MASK);
         itemSpeichern.setAccelerator(ctrl_S);
         //2.Menü
         Nameaendern.setEnabled(false);
+        NeuerStellplatz.setEnabled(false);
+        ImageIcon iconNeuerStellplatz = new ImageIcon(this.getClass().getResource("/resources/Gnome-Document-New-32.png"));
+        NeuerStellplatz.setIcon(iconNeuerStellplatz);
+        NeuesParkhaus.setIcon(iconNeuerStellplatz);
+        JMenuItem beenden = new JMenuItem("Beenden");
+        ImageIcon iconBeenden = new ImageIcon(this.getClass().getResource("/resources/Gnome-System-Log-Out-32.png"));
+        beenden.setIcon(iconBeenden);
+        Stellplatz_Anzeige.setEnabled(false);
         //zusammenbauen un registrieren von listenern
         NeuesParkhaus.addActionListener(new ActionListener() {
             @Override
@@ -100,74 +199,33 @@ public class MainClass extends JFrame {
                 new NeuesParkhaus(MainClass.this, true);
             }
         });
+        NeuerStellplatz.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                new NeuerStellplatz(MainClass.this, true);
+            }
+        });
+        Stellplatz_Anzeige.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent event) {
+                new Stellplatz_Anzeige(MainClass.this, true);
+            }
+        });
         Menu.add(NeuesParkhaus);
+        Menu.add(NeuerStellplatz);
         Menu.addSeparator();
         itemOeffnen.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                if (parkhaus != null) {
-                    int returnstatus = JOptionPane.showConfirmDialog(MainClass.this, "Soll das aktuelle Projekt geschlossen werden?", "Neues Projekt laden?", JOptionPane.OK_CANCEL_OPTION);
-                    if (returnstatus != JOptionPane.OK_OPTION) {
-                        return;
-                    }
-                }
-                JFileChooser dateiAuswahl = new JFileChooser(".");
-                int status = dateiAuswahl.showOpenDialog(MainClass.this);
-                if (status == JFileChooser.APPROVE_OPTION) {
-                    File datei = dateiAuswahl.getSelectedFile();
-                    try {
-                        load(datei.getAbsolutePath());
-                        JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich geladen!", "ok", JOptionPane.INFORMATION_MESSAGE);
-                        StatusLabel.setText("Status: Projekt " + parkhaus.getParkhaus_Name() + " geöffnet!");
-                        getDaten().aktualisieren();
-                        setProjektloaded();
-                    } catch (Exception ex) {
-                        if (debug) {
-                            ex.printStackTrace();
-                        }
-                        JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht geladen werden: " + ex.getMessage(), "Fehler beim laden", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
+                handleOpenClick();
             }
         });
         itemSpeichern.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
-                if (parkhaus == null) {
-                    JOptionPane.showMessageDialog(MainClass.this, "Kein Projekt geladen!", "Kein Projekt", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                JFileChooser dateiAuswahl = new JFileChooser(".");
-                int status = dateiAuswahl.showSaveDialog(MainClass.this);
-                if (status == JFileChooser.APPROVE_OPTION) {
-                    File datei = dateiAuswahl.getSelectedFile();
-                    try {
-                        if (datei.exists()) {
-                            int returnstatus = JOptionPane.showConfirmDialog(MainClass.this, "Soll die Datei überschrieben werden?", "Überschreiben?", JOptionPane.OK_CANCEL_OPTION);
-                            if (returnstatus == JOptionPane.OK_OPTION) {
-                                datei.delete();
-                                try {
-                                    save(datei.getAbsolutePath());
-                                    JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich gespeichert!", "ok", JOptionPane.INFORMATION_MESSAGE);
-                                } catch (Exception e) {
-                                    JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht überschrieben werden: " + e.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
-                                }
-                            }
-                        } else {
-                            try {
-                                save(datei.getAbsolutePath());
-                                JOptionPane.showMessageDialog(MainClass.this, "Datei erfolgreich gespeichert!", "ok", JOptionPane.INFORMATION_MESSAGE);
-                            } catch (Exception e) {
-                                JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht gespeichert werden: " + e.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
-                            }
-                        }
-                    } catch (Exception ex) {
-                        JOptionPane.showMessageDialog(MainClass.this, "Datei konnte nicht gespeichert werden: " + ex.getMessage(), "Fehler beim speichern", JOptionPane.ERROR_MESSAGE);
-                    }
-                }
+                handleSaveClick();
             }
         });
-        JMenuItem beenden = new JMenuItem("Beenden");
         beenden.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent event) {
@@ -191,6 +249,7 @@ public class MainClass extends JFrame {
             }
         });
         Menu2.add(Nameaendern);
+        Menu2.add(Stellplatz_Anzeige);
         MenuBar.add(getAnsichtMenu());
         MenuBar.add(Menu2);
         return MenuBar;
@@ -268,8 +327,8 @@ public class MainClass extends JFrame {
         return a;
     }
 
-    public static void neuesParkhaus(String name, int hoehe, int Stellplaetze) {
-        parkhaus = new Parkhaus(name, hoehe, Stellplaetze);
+    public static void neuesParkhaus(String name, int hoehe, int maxplaetze) {
+        parkhaus = new Parkhaus(name, hoehe, maxplaetze);
     }
 
     /**
@@ -348,42 +407,6 @@ public class MainClass extends JFrame {
 
     public static DatenUebersicht getDaten() {
         return daten;
-    }
-
-    public void Stellplatzanzahlaendern() {
-        final JFrame ChangePanel = new JFrame("Stellplatzanzahl ändern");
-        ChangePanel.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        JPanel panel = new JPanel(new BorderLayout());
-        final JLabel Label = new JLabel("Status: Bitte ändern sie die Anzahl");
-        final JTextField Stellplaetze = new JTextField(String.valueOf(parkhaus.getStellpleatze()));
-        JButton ButtonSendParkhausname = new JButton("Ok");
-        ButtonSendParkhausname.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (Tools.isInteger(Stellplaetze.getText())) {
-                    parkhaus.setStellplaetze(Integer.parseInt(Stellplaetze.getText()));
-                    Label.setText("Status: Stellplatzanzahl geändert!");
-                } else {
-                    Label.setText("Status: Keine Zahl!");
-                }
-            }
-        });
-        JButton Button1 = new JButton("Beenden");
-        Button1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                ChangePanel.remove(ChangePanel);
-                ChangePanel.repaint();
-                ChangePanel.dispose();
-            }
-        });
-        panel.add(Label, BorderLayout.NORTH);
-        panel.add(ButtonSendParkhausname, BorderLayout.EAST);
-        panel.add(Stellplaetze, BorderLayout.WEST);
-        panel.add(Button1, BorderLayout.SOUTH);
-        ChangePanel.getContentPane().add(panel);
-        ChangePanel.setVisible(true);
-        ChangePanel.setBounds(200, 200, 200, 150);
     }
 
     /**
