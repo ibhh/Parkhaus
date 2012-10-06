@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -11,16 +12,31 @@ import java.util.Date;
  * @author Simon
  */
 public class Logger {
-    
+
+    private MainClass plugin;
+
+    /**
+     * Konstruktor of Logger class
+     *
+     * @param pl
+     */
+    public Logger(MainClass pl) {
+        plugin = pl;
+    }
+
     /**
      * Logs string into file.
-     * @param in 
+     *
+     * @param in
      */
-    public static void log(String in){
+    public void log(String in) {
         Date now = new Date();
         String Stream = now.toString();
-        String path = "debug" + File.separator;
-        File file = new File(path + "debug" + ".txt");
+        String path = "debugfiles" + File.separator;
+        File directory = new File(path);
+        directory.mkdirs();
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd 'at' HH");
+        File file = new File(path + "debug-" + ft.format(now) + ".txt");
         if (!file.exists()) {
             try {
                 file.createNewFile();
