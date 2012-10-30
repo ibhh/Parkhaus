@@ -3,7 +3,7 @@ package parkhaus;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -18,9 +18,7 @@ public class ReportToHost {
     public ReportToHost(MainClass pl) {
         this.plugin = pl;
         util = new StackTraceUtil();
-        if (PrepareLibrary.loaded()) {
-            this.filesend = new FileSend(plugin);
-        }
+        this.filesend = new FileSend(plugin);
     }
 
     public String report(int line, String other, String message, String classfile, Exception stack) {
@@ -84,32 +82,33 @@ public class ReportToHost {
     public String send(String line, String message, String classfile, String stacktrace, String other) {
         String ret = "Error";
         String gameversion = "unknown";
+        gameversion = System.getProperty("os.name") + ": " + System.getProperty("os.version");
+        String url1 = "http://report.ibhh.de/index.php?programm=" + this.plugin.getName();
         try {
-            gameversion = URLEncoder.encode(System.getProperty("os.name") + ": " + System.getProperty("os.version"), "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            gameversion = "exceptiononencoding";
+            URL url = new URL(url1);
+            // Construct data
+            String data = URLEncoder.encode("version", "UTF-8") + "=" + URLEncoder.encode(String.valueOf(this.plugin.getVersion()), "UTF-8");
+            data += "&" + URLEncoder.encode("line", "UTF-8") + "=" + URLEncoder.encode("line", "UTF-8");
+            data += "&" + URLEncoder.encode("gameversion", "UTF-8") + "=" + URLEncoder.encode(gameversion, "UTF-8");
+            data += "&" + URLEncoder.encode("message", "UTF-8") + "=" + URLEncoder.encode(message, "UTF-8");
+            data += "&" + URLEncoder.encode("class", "UTF-8") + "=" + URLEncoder.encode(classfile, "UTF-8");
+            data += "&" + URLEncoder.encode("stacktrace", "UTF-8") + "=" + URLEncoder.encode(stacktrace, "UTF-8");
+            data += "&" + URLEncoder.encode("other", "UTF-8") + "=" + URLEncoder.encode(other, "UTF-8");
+
+            // Send data
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
+            wr.write(data);
+            wr.flush();
+
+            // Get the response
+            BufferedReader rd = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+            ret = rd.readLine();
+            wr.close();
+            rd.close();
+        } catch (Exception e) {
         }
-        try {
-            stacktrace = URLEncoder.encode(stacktrace, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            stacktrace = "exceptiononencoding";
-        }
-        try {
-            message = URLEncoder.encode(message, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            message = "exceptiononencoding";
-        }
-        try {
-            classfile = URLEncoder.encode(classfile, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            classfile = "exceptiononencoding";
-        }
-        try {
-            other = URLEncoder.encode(other, "UTF-8");
-        } catch (UnsupportedEncodingException ex) {
-            other = "exceptiononencoding";
-        }
-        String url = "http://report.ibhh.de/index.php?programm=" + this.plugin.getName() + "&version=" + this.plugin.getVersion() + "&line=" + line + "&gameversion=" + gameversion + "&message=" + message + "&class=" + classfile + "&stacktrace=" + stacktrace + "&other=" + other;
         try {
             String temp = "[" + this.plugin.getName() + "] Sending issue report to ibhh.de!";
             System.out.print(temp);
@@ -144,7 +143,6 @@ public class ReportToHost {
             temp = "[" + this.plugin.getName() + "] -------------------------";
             System.out.print(temp);
             this.plugin.getDebugLogger().log(temp);
-            ret = readAll(url);
             temp = "[" + this.plugin.getName() + "] Message of Server: " + ret;
             JOptionPane.showMessageDialog(plugin, ret, "Message of the Server", JOptionPane.INFORMATION_MESSAGE);
             System.out.print(temp);
@@ -160,29 +158,26 @@ public class ReportToHost {
                 ex.printStackTrace();
             }
         }
-        if (PrepareLibrary.loaded()) {
-            this.plugin.Logger("filesend loaded", "Debug");
-            if (ret != null) {
-                this.plugin.Logger("ret != null", "Debug");
+        if (ret != null) {
+            this.plugin.Logger("ret != null", "Debug");
+            try {
+                String[] id_text = ret.split(":");
+                String id = id_text[1];
+                this.plugin.Logger("ID: " + id, "Debug");
                 try {
-                    String[] id_text = ret.split(":");
-                    String id = id_text[1];
-                    this.plugin.Logger("ID: " + id, "Debug");
-                    try {
-                        if (id != null) {
-                            int returnstatus = JOptionPane.showConfirmDialog(plugin, "Sollen die Debuglogs gesendet werden?", "Logs senden?", JOptionPane.OK_CANCEL_OPTION);
-                            if (returnstatus == JOptionPane.OK_OPTION) {
-                                this.filesend.sendDebugFile(id);
-                            }
-                        }
-                    } catch (Exception e1) {
-                        this.plugin.Logger("Could not send debugfile!", "Error");
-                        if (MainClass.debug) {
-                            e1.printStackTrace();
+                    if (id != null) {
+                        int returnstatus = JOptionPane.showConfirmDialog(plugin, "Sollen die Debuglogs gesendet werden?", "Logs senden?", JOptionPane.OK_CANCEL_OPTION);
+                        if (returnstatus == JOptionPane.OK_OPTION) {
+                            this.filesend.sendDebugFile(id);
                         }
                     }
-                } catch (Exception e) {
+                } catch (Exception e1) {
+                    this.plugin.Logger("Could not send debugfile!", "Error");
+                    if (MainClass.debug) {
+                        e1.printStackTrace();
+                    }
                 }
+            } catch (Exception e) {
             }
         }
         return ret;
